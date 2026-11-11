@@ -1,0 +1,2 @@
+# Only for local Vite/Workers development. Remote environments reject this bypass.
+DEV_AUTH_BYPASS=true

@@ -1,0 +1,83 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "stacklet-local",
+  "main": "src/server/index.ts",
+  "compatibility_date": "2026-11-10",
+  "workers_dev": false,
+  "preview_urls": false,
+  "assets": {
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api", "/api/*"],
+  },
+  "vars": {
+    "APP_ENV": "local",
+    "DEV_AUTH_BYPASS": "true",
+    "APP_ORIGIN": "http://127.0.0.1:5173",
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "stacklet-local",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+    },
+  ],
+  "env": {
+    "staging": {
+      "name": "stacklet-staging",
+      "workers_dev": false,
+      "preview_urls": false,
+      "vars": {
+        "APP_ENV": "staging",
+        "DEV_AUTH_BYPASS": "false",
+        "APP_ORIGIN": "https://staging.example.invalid",
+        "ACCESS_ISSUER": "https://replace.cloudflareaccess.com",
+        "ACCESS_AUD": "REPLACE_ME",
+        "OWNER_EMAIL": "replace@example.invalid",
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "stacklet-staging",
+          "database_id": "REPLACE_STAGING_D1_ID",
+        },
+      ],
+    },
+    "production": {
+      "name": "stacklet",
+      "workers_dev": false,
+      "preview_urls": false,
+      "vars": {
+        "APP_ENV": "production",
+        "DEV_AUTH_BYPASS": "false",
+        "APP_ORIGIN": "https://example.invalid",
+        "ACCESS_ISSUER": "https://replace.cloudflareaccess.com",
+        "ACCESS_AUD": "REPLACE_ME",
+        "OWNER_EMAIL": "replace@example.invalid",
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "stacklet-production",
+          "database_id": "REPLACE_PRODUCTION_D1_ID",
+        },
+      ],
+    },
+    "e2e": {
+      "name": "stacklet-e2e",
+      "workers_dev": false,
+      "preview_urls": false,
+      "vars": {
+        "APP_ENV": "local",
+        "DEV_AUTH_BYPASS": "true",
+        "APP_ORIGIN": "http://127.0.0.1:4173",
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "stacklet-e2e",
+          "database_id": "11111111-1111-4111-a111-111111111111",
+        },
+      ],
+    },
+  },
+}

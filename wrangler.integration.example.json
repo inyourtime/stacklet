@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "stacklet-integration-tests",
+  "main": "tests/integration/staging-worker.ts",
+  "compatibility_date": "2026-11-10",
+  "workers_dev": true,
+  "preview_urls": false,
+  "vars": { "TEST_DATABASE_NAME": "stacklet-integration-tests" },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "stacklet-integration-tests",
+      "database_id": "REPLACE_WITH_DEDICATED_TEST_D1_ID"
+    }
+  ]
+}
