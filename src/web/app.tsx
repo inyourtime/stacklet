@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { version as appVersion } from "../../package.json";
 import { NavLink, Route, Routes, Link, useLocation } from "react-router-dom";
 import {
   Layers2,
@@ -11,6 +12,8 @@ import {
   ArrowUpRight,
   Eye,
   EyeOff,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { Dashboard } from "./features/dashboard";
 import { CashPage } from "./features/cash";
@@ -18,6 +21,7 @@ import { TransactionsPage, PurchaseForm } from "./features/transactions";
 import { SettingsPage } from "./features/backup";
 import { useNotice, useSummary } from "./lib/hooks";
 import { useAmountVisibility } from "./lib/amount-visibility";
+import { useTheme } from "./lib/theme";
 import { Button } from "./components/ui/button";
 import { ErrorNotice, Loading, SuccessNotice } from "./components/common";
 
@@ -42,6 +46,7 @@ function Brand({ className = "" }: { className?: string }) {
 export function App() {
   const { pathname } = useLocation();
   const { hidden, toggle } = useAmountVisibility();
+  const { dark, toggle: toggleTheme } = useTheme();
   const [purchase, setPurchase] = useState(false);
   const [notice, setNotice] = useNotice();
   const query = useSummary();
@@ -80,6 +85,18 @@ export function App() {
             <span className="journal-label">Investment journal</span>
           </div>
           <div className="topbar-actions">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="theme-toggle"
+              aria-label={dark ? "ใช้โหมดสว่าง" : "ใช้โหมดมืด"}
+              aria-pressed={dark}
+              title={dark ? "ใช้โหมดสว่าง" : "ใช้โหมดมืด"}
+              onClick={toggleTheme}
+            >
+              {dark ? <Sun /> : <Moon />}
+            </Button>
             <Button
               type="button"
               variant="ghost"
@@ -138,7 +155,10 @@ export function App() {
           )}
         </main>
         <footer>
-          Stacklet <span>ต้นทุนที่คุณบันทึก · ไม่ใช่มูลค่าตลาด</span>
+          <span className="footer-brand">
+            Stacklet <span className="app-version">v{appVersion}</span>
+          </span>
+          <span>ต้นทุนที่คุณบันทึก · ไม่ใช่มูลค่าตลาด</span>
         </footer>
       </div>
       {purchase && query.data && (

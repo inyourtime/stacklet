@@ -6,7 +6,29 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <meta name="theme-color" content="#f7f9f6" />
+    <meta name="theme-color" content="#fafbf9" />
+    <script>
+      (() => {
+        let theme;
+
+        try {
+          theme = localStorage.getItem("stacklet.theme");
+        } catch {
+          /* Use the device setting when storage is blocked. */
+        }
+
+        const dark =
+          theme === "dark" ||
+          (theme !== "light" &&
+            matchMedia("(prefers-color-scheme: dark)").matches);
+
+        document.documentElement.classList.toggle("dark", dark);
+        document.documentElement.style.colorScheme = dark ? "dark" : "light";
+        document.querySelector('meta[name="theme-color"]').content = dark
+          ? "#141c18"
+          : "#fafbf9";
+      })();
+    </script>
     <meta
       name="description"
       content="Stacklet บันทึกเงินลงทุน เงินสด และเป้าหมาย Bitcoin ส่วนตัว"

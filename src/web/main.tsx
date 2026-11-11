@@ -5,6 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import { App } from "./app";
 import { RequestError } from "./lib/api";
 import { AmountVisibilityProvider } from "./lib/amount-visibility";
+import { ThemeProvider } from "./lib/theme";
 import "./styles.css";
 
 const client = new QueryClient({
@@ -23,9 +24,11 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={client}>
       <BrowserRouter>
-        <AmountVisibilityProvider>
-          <App />
-        </AmountVisibilityProvider>
+        <ThemeProvider>
+          <AmountVisibilityProvider>
+            <App />
+          </AmountVisibilityProvider>
+        </ThemeProvider>
       </BrowserRouter>
     </QueryClientProvider>
   </StrictMode>,

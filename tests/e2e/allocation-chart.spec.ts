@@ -401,3 +401,100 @@ test("amount toggle remains usable when browser storage is blocked", async ({
   await page.getByRole("button", { name: "แสดงจำนวนเงิน", exact: true }).click();
   await expect(page.locator(".principal-amount")).toContainText("100,000.00");
 });
+
+test("theme follows the device, remembers an explicit choice and syncs tabs", async ({
+  page,
+  context,
+}, testInfo) => {
+  const root = page.locator("html");
+
+  await page.emulateMedia({ colorScheme: "dark" });
+  await showDashboard(page, summary);
+  await expect(root).toHaveClass(/dark/);
+  await expect(root).toHaveCSS("color-scheme", "dark");
+  await expect(root).toHaveCSS("background-color", "rgb(20, 28, 24)");
+  await page.emulateMedia({ colorScheme: "light" });
+  await expect(root).not.toHaveClass(/dark/);
+  await page.emulateMedia({ colorScheme: "dark" });
+  await expect(root).toHaveClass(/dark/);
+
+  const other = await context.newPage();
+  await other.emulateMedia({ colorScheme: "dark" });
+  await showDashboard(other, summary);
+  await page.getByRole("button", { name: "ใช้โหมดสว่าง", exact: true }).click();
+  await expect(root).not.toHaveClass(/dark/);
+  await expect(other.locator("html")).not.toHaveClass(/dark/);
+  await page.reload();
+  await expect(
+    page.getByRole("button", { name: "ใช้โหมดมืด", exact: true }),
+  ).toBeVisible();
+  await expect(root).toHaveCSS("color-scheme", "light");
+  await expect(root).toHaveCSS("background-color", "rgb(250, 251, 249)");
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.emulateMedia({ colorScheme: "dark" });
+  await expect(root).not.toHaveClass(/dark/);
+
+  await page.getByRole("button", { name: "ใช้โหมดมืด", exact: true }).click();
+  await expect(other.locator("html")).toHaveClass(/dark/);
+  await page.reload();
+  await expect(
+    page.getByRole("button", { name: "ใช้โหมดสว่าง", exact: true }),
+  ).toBeVisible();
+  await expect(root).toHaveClass(/dark/);
+  await expect(page.locator(".principal-amount")).toContainText("100,000.00");
+  await page.screenshot({
+    path: testInfo.outputPath("dark-dashboard.png"),
+    animations: "disabled",
+  });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+
+  await page.getByRole("button", { name: "บันทึกการซื้อ", exact: true }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toHaveCSS("background-color", "rgb(27, 37, 31)");
+  await dialog.getByLabel("ประเภทสินทรัพย์", { exact: true }).click();
+  await expect(page.getByRole("listbox")).toHaveCSS(
+    "background-color",
+    "rgb(27, 37, 31)",
+  );
+  await page.screenshot({
+    path: testInfo.outputPath("dark-form.png"),
+    animations: "disabled",
+  });
+  await page.getByRole("option", { name: "Bitcoin", exact: true }).click();
+  await dialog.getByRole("button", { name: "ปิด", exact: true }).click();
+  await page.getByRole("link", { name: "ตั้งค่า", exact: true }).click();
+  await expect(page.locator(".upload-zone")).toHaveCSS(
+    "background-color",
+    "rgb(32, 46, 36)",
+  );
+  await page.screenshot({
+    path: testInfo.outputPath("dark-settings.png"),
+    animations: "disabled",
+  });
+  await other.close();
+});
+
+test("theme bootstrap and toggle work when storage is blocked", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    for (const method of ["getItem", "setItem"]) {
+      Object.defineProperty(Storage.prototype, method, {
+        value: () => {
+          throw new DOMException("Storage is blocked", "SecurityError");
+        },
+      });
+    }
+  });
+  await page.emulateMedia({ colorScheme: "dark" });
+  await showDashboard(page, summary);
+  await expect(page.locator("html")).toHaveClass(/dark/);
+  await page.getByRole("button", { name: "ใช้โหมดสว่าง", exact: true }).click();
+  await expect(page.locator("html")).not.toHaveClass(/dark/);
+  await page.getByRole("button", { name: "ใช้โหมดมืด", exact: true }).click();
+  await expect(page.locator("html")).toHaveClass(/dark/);
+});
