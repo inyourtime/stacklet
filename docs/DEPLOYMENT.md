@@ -29,7 +29,9 @@ Vite plugin เลือก environment ด้วย `CLOUDFLARE_ENV` และ�
 
 ### Auto deploy staging จาก GitHub
 
-Workflow `.github/workflows/check.yml` รัน checks, domain/integration tests, browser tests และ build บน push/PR ทุก branch เมื่อเป็น push เข้า `staging` และ job `verify` ผ่าน จะรัน job `deploy-staging` ต่อ การ merge PR เข้า `staging` ทำให้เกิด push จึง deploy ด้วย ส่วน PR ที่ยังไม่ merge และ push เข้า `main` จะรันเฉพาะ checks
+Workflow `.github/workflows/check.yml` รัน checks, domain/integration tests, browser tests และ build บน PR ทุก branch และ push เข้า `main` โดยไม่รันซ้ำจาก push เข้า feature branch และไม่มี job deploy ที่ถูก skip ใน PR
+
+Workflow `.github/workflows/deploy-staging.yml` ทำงานเฉพาะ push เข้า `staging` รวมถึงการ merge PR โดยเรียก `check.yml` ผ่าน reusable workflow ก่อน เมื่อ job `verify` ผ่านจึงรัน `deploy-staging` ต่อ จึงใช้ชุดตรวจเดียวกันทั้ง PR และ staging
 
 ตั้งค่าที่ GitHub repository → Settings → Environments → `staging` แล้วเลือก Deployment branches and tags → Selected branches and tags → เพิ่ม branch `staging` หากต้องการ deploy อัตโนมัติทันทีให้ไม่กำหนด required reviewers หรือ wait timer
 
