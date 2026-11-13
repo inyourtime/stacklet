@@ -5,4 +5,5 @@ export const queryKeys = {
   transactions: (type: string, q: string) =>
     ["stacklet", "transactions", type, q] as const,
   goal: ["stacklet", "goal"] as const,
+  btcPrice: ["market", "btc-thb"] as const,
 };

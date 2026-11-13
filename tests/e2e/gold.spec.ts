@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("records, filters, edits and deletes gold purchases", async ({
   page,
