@@ -39,10 +39,12 @@
   --asset-stock: #3b6fdf;
   --asset-fund: #8b5cf6;
   --asset-btc: #d97706;
+  --asset-gold: #a38a16;
   --asset-cash: #0d9488;
   --asset-stock-surface: #eaf0ff;
   --asset-fund-surface: #f1eaff;
   --asset-btc-surface: #fff3e3;
+  --asset-gold-surface: #faf4d6;
   --page: #fafbf9;
   --background: #fff;
   --foreground: #25342b;
@@ -92,10 +94,12 @@
   --asset-stock: #83a7ff;
   --asset-fund: #b69aff;
   --asset-btc: #f2b45f;
+  --asset-gold: #dcc95c;
   --asset-cash: #50cdbb;
   --asset-stock-surface: #21314b;
   --asset-fund-surface: #322a49;
   --asset-btc-surface: #3c3020;
+  --asset-gold-surface: #38341e;
   --page: #141c18;
   --background: #1b251f;
   --foreground: #e3ece3;
@@ -555,6 +559,9 @@ main {
 .donut-segment.btc {
   fill: var(--asset-btc);
 }
+.donut-segment.gold {
+  fill: var(--asset-gold);
+}
 .donut-segment.cash {
   fill: var(--asset-cash);
 }
@@ -575,6 +582,9 @@ main {
 }
 .allocation-donut[data-active="btc"] {
   --allocation-active: var(--asset-btc);
+}
+.allocation-donut[data-active="gold"] {
+  --allocation-active: var(--asset-gold);
 }
 .allocation-donut[data-active="cash"] {
   --allocation-active: var(--asset-cash);
@@ -626,6 +636,9 @@ main {
 .btc {
   background: var(--asset-btc);
 }
+.gold {
+  background: var(--asset-gold);
+}
 .cash {
   background: var(--asset-cash);
 }
@@ -654,6 +667,9 @@ main {
 }
 .allocation-list > button[data-asset="btc"] {
   --allocation-color: var(--asset-btc);
+}
+.allocation-list > button[data-asset="gold"] {
+  --allocation-color: var(--asset-gold);
 }
 .allocation-list > button[data-asset="cash"] {
   --allocation-color: var(--asset-cash);
@@ -935,6 +951,10 @@ footer {
 .asset-symbol.fund {
   background: var(--asset-fund-surface);
   color: var(--asset-fund);
+}
+.asset-symbol.gold {
+  background: var(--asset-gold-surface);
+  color: var(--asset-gold);
 }
 .asset-cell strong {
   font-size: 0.9375rem;

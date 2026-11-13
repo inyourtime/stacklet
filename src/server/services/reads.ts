@@ -10,6 +10,7 @@ import {
 import { formatThb, safeSum } from "../../shared/money";
 import { formatBtc } from "../../shared/btc";
 import type { Backup, Envelope, Meta, Summary } from "../../shared/contracts";
+import { assetTypes } from "../../shared/contracts";
 
 export async function summary(
   db: D1Database,
@@ -38,7 +39,7 @@ export async function summary(
   const monthly = result[2].results[0] as { amount: number; count: number };
   const accounts = (result[0].results as CashRow[]).map(cashDto);
 
-  const allocations = (["stock", "fund", "btc"] as const).map((type) => ({
+  const allocations = assetTypes.map((type) => ({
     type,
     amount: Number(aggregates.find((r) => r.asset_type === type)?.amount ?? 0),
   }));

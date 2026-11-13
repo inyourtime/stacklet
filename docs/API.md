@@ -86,7 +86,7 @@ Transaction fields:
 }
 ```
 
-For stock/fund, btcQuantity must be null. Cash account null means new money from outside the app. The app does not infer exchange rates or foreign currency balances.
+assetType accepts stock, fund, btc, or gold. For stock/fund/gold, btcQuantity must be null; gold records cost in THB without a weight or quantity field. The transactions type filter and summary allocations also support gold. Cash account null means new money from outside the app. The app does not infer exchange rates or foreign currency balances.
 
 Pagination sorts `trade_date DESC, id DESC`. Cursor is opaque; reuse it with the same filters. Limit defaults to 30, maximum 100. Search escapes literal `%`, `_`, and backslash. Escaped LIKE pattern including surrounding wildcards must fit D1's 50-byte limit; invalid queries return 400.
 

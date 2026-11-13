@@ -5,6 +5,7 @@ import { ArrowDownLeft, Plus, Search, PenLine, Trash2 } from "lucide-react";
 import {
   purchaseSchema,
   purchaseEditSchema,
+  assetTypes,
   type Transaction,
   type CashAccount,
 } from "../../../shared/contracts";
@@ -152,11 +153,10 @@ export function PurchaseForm({
               if (value === "btc") setName("BTC");
               else if (name === "BTC") setName("");
             }}
-            options={[
-              { value: "stock", label: "หุ้น" },
-              { value: "fund", label: "กองทุน" },
-              { value: "btc", label: "Bitcoin" },
-            ]}
+            options={assetTypes.map((value) => ({
+              value,
+              label: assetLabels[value],
+            }))}
           />
           <TextField
             label="วันที่ซื้อ"
@@ -376,7 +376,7 @@ export function PurchaseTable({
 
 export function TransactionsPage() {
   const accounts = useAccounts();
-  const [type, setType] = useState<"all" | "stock" | "fund" | "btc">("all");
+  const [type, setType] = useState<"all" | Transaction["assetType"]>("all");
   const [q, setQ] = useState("");
   const deferredQ = useDeferredValue(q);
   const [edit, setEdit] = useState<Transaction | "new" | null>(null);
@@ -422,7 +422,7 @@ export function TransactionsPage() {
           />
         </div>
         <fieldset className="filter-tabs" aria-label="ประเภทสินทรัพย์">
-          {(["all", "stock", "fund", "btc"] as const).map((t) => (
+          {(["all", ...assetTypes] as const).map((t) => (
             <button
               key={t}
               aria-pressed={type === t}
@@ -464,7 +464,7 @@ export function TransactionsPage() {
         <Empty>
           <ArrowDownLeft size={30} />
           <h3>{q || type !== "all" ? "ไม่พบรายการที่ตรงกัน" : "ยังไม่มีรายการซื้อ"}</h3>
-          <p>บันทึกหุ้น กองทุน หรือ Bitcoin ที่คุณซื้อ</p>
+          <p>บันทึกหุ้น กองทุน Bitcoin หรือทองคำที่คุณซื้อ</p>
           <Button onClick={() => setEdit("new")} disabled={!accounts.data}>
             เพิ่มรายการแรก
           </Button>

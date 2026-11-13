@@ -19,6 +19,7 @@ const summary: Summary = {
     { type: "stock", amountThb: "25000.00" },
     { type: "fund", amountThb: "15000.00" },
     { type: "btc", amountThb: "10000.00" },
+    { type: "gold", amountThb: "0.00" },
     { type: "cash", amountThb: "50000.00" },
   ],
   cashAccounts: [
@@ -211,7 +212,7 @@ test("shows a neutral empty chart when the portfolio has no money", async ({
   await expect(chart.getByRole("img")).toHaveAccessibleDescription(
     "ยังไม่มีเงินต้นสำหรับแสดงสัดส่วน",
   );
-  for (const category of ["หุ้น", "กองทุน", "Bitcoin", "เงินสด"]) {
+  for (const category of ["หุ้น", "กองทุน", "Bitcoin", "ทองคำ", "เงินสด"]) {
     await expect(
       chart.getByRole("button", {
         name: `${category} 0.00 บาท สัดส่วน 0.0%`,
@@ -497,4 +498,49 @@ test("theme bootstrap and toggle work when storage is blocked", async ({
   await expect(page.locator("html")).not.toHaveClass(/dark/);
   await page.getByRole("button", { name: "ใช้โหมดมืด", exact: true }).click();
   await expect(page.locator("html")).toHaveClass(/dark/);
+});
+
+test("shows gold allocation in light and dark themes", async ({
+  page,
+}, testInfo) => {
+  await showDashboard(page, {
+    ...summary,
+    allocations: [
+      { type: "stock", amountThb: "25000.00" },
+      { type: "fund", amountThb: "10000.00" },
+      { type: "btc", amountThb: "5000.00" },
+      { type: "gold", amountThb: "10000.00" },
+      { type: "cash", amountThb: "50000.00" },
+    ],
+  });
+  const chart = page.locator(".allocation-section");
+  const gold = chart.getByRole("button", {
+    name: "ทองคำ 10,000.00 บาท สัดส่วน 10.0%",
+    exact: true,
+  });
+  await gold.click();
+  await expect(gold).toHaveAttribute("aria-pressed", "true");
+  await expect(chart.locator(".donut-center")).toContainText("ทองคำ");
+  await expect(chart.locator(".donut-center")).toContainText("10.0%");
+  await expect(chart.locator(".donut-center")).toContainText("10,000.00");
+  await expect(chart.locator("path.gold")).toHaveCSS(
+    "fill",
+    "rgb(163, 138, 22)",
+  );
+  await chart.screenshot({
+    path: testInfo.outputPath("gold-allocation-light.png"),
+  });
+  await page.getByRole("button", { name: "ใช้โหมดมืด", exact: true }).click();
+  await expect(chart.locator("path.gold")).toHaveCSS(
+    "fill",
+    "rgb(220, 201, 92)",
+  );
+  await chart.screenshot({
+    path: testInfo.outputPath("gold-allocation-dark.png"),
+  });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
 });

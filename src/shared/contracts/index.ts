@@ -4,6 +4,8 @@ import { parseBtc } from "../btc";
 
 export const uuid = z.uuid();
 export const version = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
+export const assetTypes = ["stock", "fund", "btc", "gold"] as const;
+export const assetTypeSchema = z.enum(assetTypes);
 
 export const thb = z
   .string()
@@ -63,7 +65,7 @@ export const adjustmentSchema = z
   }, "ยอดเพิ่มหรือลดต้องมากกว่า 0");
 
 const purchaseFields = {
-  assetType: z.enum(["stock", "fund", "btc"]),
+  assetType: assetTypeSchema,
   assetName: name,
   tradeDate: date,
   amountThb: thb.refine((v) => {
@@ -189,7 +191,7 @@ export const summarySchema = z.object({
   monthPurchaseCount: z.number(),
   allocations: z.array(
     z.object({
-      type: z.enum(["stock", "fund", "btc", "cash"]),
+      type: z.enum([...assetTypes, "cash"]),
       amountThb: z.string(),
     }),
   ),

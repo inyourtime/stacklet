@@ -1,4 +1,4 @@
--- Fresh databases only. Existing deployments must use reviewed forward migrations.
+-- Canonical schema for fresh databases, including gold purchases.
 PRAGMA foreign_keys = ON;
 
 CREATE TABLE app_meta (
@@ -91,7 +91,7 @@ CREATE TABLE cash_accounts (
 
 CREATE TABLE transactions (
   id TEXT PRIMARY KEY,
-  asset_type TEXT NOT NULL CHECK (asset_type IN ('stock', 'fund', 'btc')),
+  asset_type TEXT NOT NULL CHECK (asset_type IN ('stock', 'fund', 'btc', 'gold')),
   asset_name TEXT NOT NULL CHECK (length(trim(asset_name)) BETWEEN 1 AND 80),
   trade_date TEXT NOT NULL CHECK (
     length(trade_date) = 10

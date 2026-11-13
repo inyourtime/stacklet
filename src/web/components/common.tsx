@@ -234,5 +234,6 @@ export const assetLabels = {
   stock: "หุ้น",
   fund: "กองทุน",
   btc: "Bitcoin",
+  gold: "ทองคำ",
   cash: "เงินสด",
 };

@@ -74,9 +74,11 @@ pnpm deploy:production
 
 ## 5. Operations and rollback
 
+ใช้ `db/schema.sql` เป็นไฟล์ schema เดียวสำหรับสร้างฐานข้อมูลใหม่ รองรับหุ้น กองทุน Bitcoin และทองคำแล้ว
+
 - สำรองผ่านหน้า settings เป็นระยะ และก่อนแก้ schema เก็บไฟล์เป็นข้อมูลส่วนตัว
 - Monitor Worker error counts/duration และใช้ request ID เทียบ logs; ไม่ log payload ทั้งก้อน
 - Rollback code ใช้ `pnpm exec wrangler rollback <previous-version-id> --config wrangler.remote.local.json --env production` ตาม version ที่บันทึกไว้ ไม่ reset D1
-- Database changes หลังรุ่นแรกต้องเป็น forward migrations ที่ตรวจ compatibility กับ code รุ่นก่อนหน้า ห้าม deploy schema เปลี่ยนแบบ destructive โดยไม่มี backup/restore plan
+- การเปลี่ยน schema ให้แก้ที่ `db/schema.sql` การ initialize ต้องใช้ฐานว่าง และการล้างฐานข้อมูลต้องเป็นคำสั่งที่เจ้าของระบุชัดเจน
 - กู้ข้อมูลจากหน้า settings: validate → ดาวน์โหลดข้อมูลปัจจุบัน → confirm → ตรวจ summary และรายการ ระบบเปลี่ยน epoch; อุปกรณ์อื่นควร reload
 - หาก Access config หรือ signing secret หาย ระบบปฏิเสธคำขอที่เกี่ยวข้องจนตั้งค่ากลับ ไม่เปิด bypass ชั่วคราวบน remote

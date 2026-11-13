@@ -19,7 +19,7 @@ export type CashRow = {
 
 export type TransactionRow = {
   id: string;
-  asset_type: "stock" | "fund" | "btc";
+  asset_type: Transaction["assetType"];
   asset_name: string;
   trade_date: string;
   amount_satang: number;

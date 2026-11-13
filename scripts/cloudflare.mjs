@@ -45,7 +45,7 @@ const run = (command, values, options = {}) =>
   execFileSync(command, values, { stdio: "inherit", ...options });
 
 if (action === "init") {
-  // Inspect before initialization; schema.sql is never used as a reset or deploy migration.
+  // Inspect before initialization; deployments do not initialize or clear data.
   const output = execFileSync(
     "pnpm",
     [
@@ -67,7 +67,7 @@ if (action === "init") {
 
   if (rows.some((r) => r.results?.length))
     throw new Error(
-      "Database is not empty. Refusing to initialize existing data; use a reviewed forward migration.",
+      "Database is not empty. Refusing to initialize existing data; explicitly clear the target database before initialization.",
     );
 
   run("pnpm", [

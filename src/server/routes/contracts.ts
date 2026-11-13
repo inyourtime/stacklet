@@ -1,6 +1,7 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import {
   adjustmentSchema,
+  assetTypeSchema,
   backupSchema as backupSchemaContract,
   cashAccountSchema as cashAccountSchemaContract,
   cashCreateSchema,
@@ -109,7 +110,7 @@ export const summaryQuerySchema = z.object({
 });
 
 export const transactionsQuerySchema = z.object({
-  type: z.enum(["stock", "fund", "btc"]).optional(),
+  type: assetTypeSchema.optional(),
   q: z
     .string()
     .trim()
