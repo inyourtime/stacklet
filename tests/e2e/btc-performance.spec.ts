@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import type { Summary } from "../../src/shared/contracts";
 import { BTC_PRICE_URL } from "../../src/web/lib/btc-price";
 
@@ -33,6 +33,33 @@ async function mockPortfolio(page: Page, data = summary) {
     route.fulfill({ json: { data: { items: [], nextCursor: null }, meta } }),
   );
 }
+
+test("uses the default BTC quote across tabs and separate browser contexts", async ({
+  page,
+  context,
+  newContext,
+}) => {
+  const otherTab = await context.newPage();
+  const otherContext = await newContext();
+  const otherDevice = await otherContext.newPage();
+
+  for (const target of [page, otherTab, otherDevice]) {
+    await mockPortfolio(target);
+    await target.goto("/");
+    const performance = target.getByRole("region", {
+      name: "กำไร / ขาดทุน BTC",
+    });
+
+    await expect(performance.locator(".btc-valuation dd")).toHaveText([
+      "฿20,000.00",
+      "฿30,000.00",
+      "฿3,000,000.00",
+    ]);
+    await expect(performance.locator(".btc-profit")).toHaveText(
+      "+฿10,000.00(+50.00%)",
+    );
+  }
+});
 
 test("shows BTC profit, refreshes to a loss, and labels stale prices on failure", async ({
   page,

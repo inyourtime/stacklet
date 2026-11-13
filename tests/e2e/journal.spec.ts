@@ -1,9 +1,9 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import { readFile } from "node:fs/promises";
 
 test("cash → BTC → edit → delete → another device → backup/restore", async ({
   page,
-  browser,
+  newContext,
 }, testInfo) => {
   const name = `เงินลงทุน ${testInfo.project.name}`;
   const errors: string[] = [];
@@ -95,7 +95,7 @@ test("cash → BTC → edit → delete → another device → backup/restore", a
   await page.reload();
   await expect(card).toContainText("55,000.00");
 
-  const second = await browser.newContext();
+  const second = await newContext();
   const other = await second.newPage();
 
   await other.goto("http://127.0.0.1:4173/cash");

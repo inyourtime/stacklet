@@ -46,6 +46,7 @@ pnpm build
 - Domain tests ตรวจ decimal precision, limits, วัน และ validation
 - Integration tests ใช้ **Miniflare/workerd + D1 จริงใน local runtime** ไม่ใช้ฐานข้อมูลจำลองใน array ทดสอบ SQL triggers, rollback, concurrency, JWT และ restore 1,000 รายการ
 - Browser tests ใช้ Playwright ทดสอบ flow ครบบน desktop/mobile และ browser context ที่สอง
+- E2E ทุกชุดใช้ `test` จาก `tests/e2e/fixtures.ts` ซึ่ง mock ราคา Binance เป็นค่าคงที่ในทุกแท็บ หากต้องสร้าง browser context เพิ่มให้ใช้ fixture `newContext` เพื่อให้ได้ mock เดียวกัน ส่วนเคสทดสอบราคาเปลี่ยนหรือ API ล้มเหลวใช้ `page.route` override ได้ จึงไม่ต้องเรียก Binance จริงระหว่างรัน tests
 - E2E ใช้ฐานข้อมูลเฉพาะ `.wrangler/e2e` และล้างเฉพาะพื้นที่ทดสอบนี้ก่อนรัน ไม่แตะ local DB ที่ใช้พัฒนา
 - `pnpm test:staging` ใช้ Worker และ D1 แยกสำหรับ integration เท่านั้น ดูคู่มือ deployment
 
