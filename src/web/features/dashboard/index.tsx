@@ -127,7 +127,12 @@ export function Dashboard() {
             totalPrincipalThb={s.totalPrincipalThb}
           />
         </section>
-        <BtcGoal btc={s.btc} />
+        <BtcGoal
+          btc={s.btc}
+          costThb={
+            s.allocations.find((a) => a.type === "btc")?.amountThb ?? "0.00"
+          }
+        />
       </div>
       <section className="dashboard-cash">
         <div className="section-top">

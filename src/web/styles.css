@@ -765,6 +765,69 @@ main {
   background: var(--muted);
   border-radius: 3px;
 }
+.btc-performance {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-subtle);
+}
+.btc-performance h3 {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+.btc-profit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: 8px 0 18px;
+  font-family: "Inter Variable", sans-serif;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.btc-profit strong {
+  min-width: 0;
+  font-size: 1.625rem;
+  font-weight: 500;
+}
+.btc-profit > span {
+  font-size: 0.875rem;
+}
+.btc-profit[data-direction="gain"] {
+  color: var(--success-foreground);
+}
+.btc-profit[data-direction="loss"] {
+  color: var(--error-foreground);
+}
+.btc-valuation {
+  display: grid;
+  gap: 8px;
+  font-size: 0.8125rem;
+}
+.btc-valuation > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+}
+.btc-valuation dt {
+  color: var(--text-muted);
+}
+.btc-valuation dd {
+  font-family: "Inter Variable", sans-serif;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.btc-price-error {
+  margin-top: 14px;
+  color: var(--error-foreground);
+  font-size: 0.8125rem;
+}
+.btc-price-note {
+  font-size: 0.75rem;
+  margin-bottom: 0;
+}
 .section-note {
   font-size: 0.875rem;
   color: var(--text-faint);
