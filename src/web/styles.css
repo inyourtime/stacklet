@@ -1003,7 +1003,6 @@ footer {
   color: white;
 }
 .asset-symbol.btc {
-  font-size: 1.5rem;
   color: var(--asset-btc);
   background: var(--asset-btc-surface);
 }
