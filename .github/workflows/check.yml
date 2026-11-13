@@ -9,6 +9,9 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -21,13 +24,33 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm cf:typegen
       - run: pnpm check
+        id: check
       - run: pnpm test
+        id: unit
       - run: pnpm test:integration
+        id: integration
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
+        id: e2e
       - run: pnpm build
+        id: build
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: browser-test-results
           path: test-results/
+      - name: Report check results
+        if: always()
+        continue-on-error: true
+        uses: actions/github-script@v9
+        env:
+          CHECK_STEPS: ${{ toJSON(steps) }}
+          CHECK_STATUS: ${{ job.status }}
+        with:
+          script: |
+            const { reportCheckResults } = await import(`${process.env.GITHUB_WORKSPACE}/scripts/report-check-results.mjs`);
+            await reportCheckResults({
+              github, context, core,
+              steps: JSON.parse(process.env.CHECK_STEPS),
+              status: process.env.CHECK_STATUS,
+            });

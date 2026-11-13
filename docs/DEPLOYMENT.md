@@ -31,6 +31,8 @@ Vite plugin เลือก environment ด้วย `CLOUDFLARE_ENV` และ�
 
 Workflow `.github/workflows/check.yml` รัน checks, domain/integration tests, browser tests และ build บน PR ทุก branch และ push เข้า `main` โดยไม่รันซ้ำจาก push เข้า feature branch และไม่มี job deploy ที่ถูก skip ใน PR
 
+หลังตรวจเสร็จจะสรุปผลแต่ละขั้นตอนใน Actions job summary และคอมเมนต์ใน PR พร้อม commit และลิงก์ logs/artifacts โดยอัปเดตคอมเมนต์เดิมในแต่ละรอบ รวมกรณี tests ล้มเหลวหรือขั้นตอนถูกข้าม ไม่ให้ผลของ commit เก่าทับ commit ใหม่ การโพสต์คอมเมนต์ล้มเหลวไม่เปลี่ยนผล verification สำหรับ PR จาก fork จะมีเฉพาะ job summary เพราะ token ไม่มีสิทธิ์เขียนคอมเมนต์
+
 Workflow `.github/workflows/deploy-staging.yml` ทำงานเฉพาะ push เข้า `staging` รวมถึงการ merge PR โดยเรียก `check.yml` ผ่าน reusable workflow ก่อน เมื่อ job `verify` ผ่านจึงรัน `deploy-staging` ต่อ จึงใช้ชุดตรวจเดียวกันทั้ง PR และ staging
 
 ตั้งค่าที่ GitHub repository → Settings → Environments → `staging` แล้วเลือก Deployment branches and tags → Selected branches and tags → เพิ่ม branch `staging` หากต้องการ deploy อัตโนมัติทันทีให้ไม่กำหนด required reviewers หรือ wait timer
