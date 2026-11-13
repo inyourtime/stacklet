@@ -84,7 +84,7 @@ export function BtcPerformance({
       ) : null}
       {performance && (
         <p className="section-note btc-price-note">
-          กำไร/ขาดทุนที่ยังไม่รับรู้ · Binance
+          กำไร/ขาดทุนที่ยังไม่รับรู้ · Binance TH
           <br />
           อัปเดต{" "}
           {new Date(quote.dataUpdatedAt).toLocaleTimeString("th-TH", {

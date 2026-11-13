@@ -140,6 +140,6 @@ Export can exceed import limits; then `X-Backup-Restorable: false`, no receipt i
 
 Money: max 1,000,000,000 THB per account/purchase; BTC/goal: max 21,000,000 per value. Purchase totals and combined balances must fit JavaScript safe integers in smallest units. More than two baht or eight BTC decimal places is rejected without rounding.
 
-The dashboard fetches BTC/THB market prices directly from `https://data-api.binance.vision/api/v3/ticker/price?symbol=BTCTHB` every 60 seconds while open. This public request omits credentials and is separate from the authenticated API. Unrealized BTC profit/loss uses the current portfolio's BTC quantity and BTC allocation cost, with integer arithmetic and satang rounding. Quotes are not stored in D1 or backups and do not change principal totals or allocations.
+The dashboard fetches BTC/THB market prices directly from `https://api.binance.th/api/v1/ticker/price?symbol=BTCTHB` every 60 seconds while open. This public request omits credentials and is separate from the authenticated API. Unrealized BTC profit/loss uses the current portfolio's BTC quantity and BTC allocation cost, with integer arithmetic and satang rounding. Quotes are not stored in D1 or backups and do not change principal totals or allocations.
 
 No account deletion/archive API, sells, transfers, recurring jobs, or multi-user ownership are included in v1.

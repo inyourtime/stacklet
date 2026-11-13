@@ -2,7 +2,7 @@ import { z } from "zod";
 import { parseUnits } from "../../shared/money";
 
 export const BTC_PRICE_URL =
-  "https://data-api.binance.vision/api/v3/ticker/price?symbol=BTCTHB";
+  "https://api.binance.th/api/v1/ticker/price?symbol=BTCTHB";
 
 const priceSchema = z.object({
   symbol: z.literal("BTCTHB"),

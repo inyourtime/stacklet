@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { calculateBtcPerformance } from "../../src/shared/btc";
-import { BTC_PRICE_URL, fetchBtcPrice } from "../../src/web/lib/btc-price";
+import { fetchBtcPrice } from "../../src/web/lib/btc-price";
 
 describe("BTC unrealized profit/loss", () => {
   it.each([
@@ -57,7 +57,7 @@ describe("BTC unrealized profit/loss", () => {
   });
 });
 
-describe("Binance BTC quote", () => {
+describe("Binance TH BTC quote", () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it("fetches the requested pair without credentials and keeps price precision", async () => {
@@ -71,7 +71,7 @@ describe("Binance BTC quote", () => {
 
     await expect(fetchBtcPrice()).resolves.toBe("2343846.12345678");
     expect(fetch).toHaveBeenCalledWith(
-      BTC_PRICE_URL,
+      "https://api.binance.th/api/v1/ticker/price?symbol=BTCTHB",
       expect.objectContaining({
         credentials: "omit",
         cache: "no-store",
