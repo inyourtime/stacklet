@@ -21,6 +21,8 @@ pnpm dev
 
 เปิด URL ที่ Vite แสดง (ปกติ `http://127.0.0.1:5173`) ฐานข้อมูล local เริ่มว่าง คำสั่ง `db:init:local` ใช้ครั้งแรกเท่านั้น ไม่ต้อง initialize ซ้ำเวลาเปิด dev server
 
+Dev server ใช้ `wrangler.jsonc` เสมอ แม้ Terminal ยังตั้ง `STACKLET_CONFIG` จากการ deploy อยู่ ส่วน build/deploy ใช้ `STACKLET_CONFIG` เพื่อเลือกไฟล์ config ของ environment ที่ต้องการ
+
 Local auth bypass ทำงานเฉพาะ `APP_ENV=local` และ hostname loopback เท่านั้น บน staging/production ต้องใช้ Cloudflare Access ที่ตั้งค่าถูกต้อง
 
 ## คำสั่งตรวจสอบ
