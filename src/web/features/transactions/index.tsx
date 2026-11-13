@@ -1,7 +1,14 @@
 import { useAmountVisibility } from "../../lib/amount-visibility";
 import { useDeferredValue, useState } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { ArrowDownLeft, Plus, Search, PenLine, Trash2 } from "lucide-react";
+import {
+  ArrowDownLeft,
+  Bitcoin,
+  Plus,
+  Search,
+  PenLine,
+  Trash2,
+} from "lucide-react";
 import {
   purchaseSchema,
   purchaseEditSchema,
@@ -317,9 +324,11 @@ export function PurchaseTable({
             <TableCell>
               <div className="asset-cell">
                 <span className={`asset-symbol ${t.assetType}`}>
-                  {t.assetType === "btc"
-                    ? "₿"
-                    : t.assetName.slice(0, 2).toUpperCase()}
+                  {t.assetType === "btc" ? (
+                    <Bitcoin size={24} aria-hidden="true" />
+                  ) : (
+                    t.assetName.slice(0, 2).toUpperCase()
+                  )}
                 </span>
                 <div>
                   <strong>{t.assetName}</strong>

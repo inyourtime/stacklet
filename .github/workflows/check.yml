@@ -1,27 +1,66 @@
 name: Check
-on: [push, pull_request]
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_call:
+permissions:
+  contents: read
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
         with:
           version: 12.18.0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 26
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm cf:typegen
-      - run: pnpm check
-      - run: pnpm test
-      - run: pnpm test:integration
+      - run: node scripts/run-ci-check.mjs check pnpm check
+        id: check
+      - run: node scripts/run-ci-check.mjs unit pnpm test --reporter=default --reporter=json --outputFile.json=.ci-results/unit.json
+        id: unit
+      - run: node scripts/run-ci-check.mjs integration pnpm test:integration --reporter=default --reporter=json --outputFile.json=.ci-results/integration.json
+        id: integration
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm test:e2e
-      - run: pnpm build
-      - uses: actions/upload-artifact@v4
+      - run: node scripts/run-ci-check.mjs e2e pnpm test:e2e --reporter=list,json
+        id: e2e
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: .ci-results/e2e.json
+      - run: node scripts/run-ci-check.mjs build pnpm build
+        id: build
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: browser-test-results
           path: test-results/
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: check-reports
+          path: .ci-results/
+          include-hidden-files: true
+          if-no-files-found: ignore
+      - name: Report check results
+        if: always()
+        continue-on-error: true
+        uses: actions/github-script@v9
+        env:
+          CHECK_STEPS: ${{ toJSON(steps) }}
+          CHECK_STATUS: ${{ job.status }}
+        with:
+          script: |
+            const { readCheckMetrics, reportCheckResults } = await import(`${process.env.GITHUB_WORKSPACE}/scripts/report-check-results.mjs`);
+            await reportCheckResults({
+              github, context, core,
+              steps: JSON.parse(process.env.CHECK_STEPS),
+              status: process.env.CHECK_STATUS,
+              metrics: await readCheckMetrics(),
+            });

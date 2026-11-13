@@ -6,6 +6,7 @@ import { useOperation } from "../../lib/hooks";
 import { Modal, ErrorNotice, TextField, Submit } from "../../components/common";
 import { Button } from "../../components/ui/button";
 import { Progress } from "../../components/ui/progress";
+import { BtcPerformance } from "./performance";
 
 export function GoalForm({
   btc,
@@ -72,7 +73,13 @@ export function GoalForm({
   );
 }
 
-export function BtcGoal({ btc }: { btc: Summary["btc"] }) {
+export function BtcGoal({
+  btc,
+  costThb,
+}: {
+  btc: Summary["btc"];
+  costThb: string;
+}) {
   const { quantity } = useAmountVisibility();
   const [open, setOpen] = useState(false);
 
@@ -110,6 +117,7 @@ export function BtcGoal({ btc }: { btc: Summary["btc"] }) {
       ) : (
         <p className="section-note">ตั้งเป้าหมายเพื่อดูความคืบหน้าการสะสม</p>
       )}
+      <BtcPerformance quantity={btc.quantity} costThb={costThb} />
       {open && <GoalForm btc={btc} onClose={() => setOpen(false)} />}
     </section>
   );
