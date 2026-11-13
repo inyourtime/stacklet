@@ -27,6 +27,38 @@ pnpm deploy:staging
 
 Vite plugin เลือก environment ด้วย `CLOUDFLARE_ENV` และสร้าง deployment config ตาม build จริง Scripts ใช้ config ที่ plugin สร้าง ไม่เดาชื่อโฟลเดอร์ output
 
+### Auto deploy staging จาก GitHub
+
+Workflow `.github/workflows/check.yml` รัน checks, domain/integration tests, browser tests และ build บน push/PR ทุก branch เมื่อเป็น push เข้า `staging` และ job `verify` ผ่าน จะรัน job `deploy-staging` ต่อ การ merge PR เข้า `staging` ทำให้เกิด push จึง deploy ด้วย ส่วน PR ที่ยังไม่ merge และ push เข้า `main` จะรันเฉพาะ checks
+
+ตั้งค่าที่ GitHub repository → Settings → Environments → `staging` แล้วเลือก Deployment branches and tags → Selected branches and tags → เพิ่ม branch `staging` หากต้องการ deploy อัตโนมัติทันทีให้ไม่กำหนด required reviewers หรือ wait timer
+
+เพิ่ม Environment secrets สามรายการ:
+
+| Secret                      | ค่า                                                                       |
+| --------------------------- | ------------------------------------------------------------------------ |
+| `CLOUDFLARE_API_TOKEN`      | API token สำหรับ CI ของ Cloudflare account ที่มี Worker staging              |
+| `CLOUDFLARE_ACCOUNT_ID`     | Account ID ของ Cloudflare account เดียวกัน                                 |
+| `CLOUDFLARE_STAGING_CONFIG` | เนื้อหา JSON ทั้งไฟล์ `wrangler.remote.local.json` ที่ตั้ง `env.staging` ถูกต้องแล้ว |
+
+สร้าง token ที่ Cloudflare → My Profile → API Tokens → Create Token โดยใช้ template **Edit Cloudflare Workers** จำกัด account ให้ตรงกับ staging และ zone ให้ตรงกับโดเมนของ staging Token ต้อง deploy Worker, อ่านรายการ Worker secrets และจัดการ Custom Domain ได้ ให้คง permission ของ template สำหรับ Wrangler แล้วกำหนด resource scope ให้ตรงกับ account/zone ที่ใช้งาน
+
+Workflow สร้างไฟล์ config ชั่วคราวจาก secret แล้วเรียก `pnpm deploy:staging` โดยไม่พิมพ์ config ลง log ค่า `IMPORT_SIGNING_SECRET` ต้องมีอยู่ใน Cloudflare Worker แล้วตามขั้นตอนตั้งค่าครั้งแรก ไม่ต้องคัดลอกค่าตัวนี้เข้า GitHub
+
+Job deploy เรียงคิวด้วย concurrency group เดียวกัน จึงไม่ deploy staging พร้อมกันหลายงาน การ deploy ไม่ initialize, reset หรือเปลี่ยน schema ของ D1
+
+หากแก้ secrets หลัง workflow ล้มเหลว ให้ไป Actions → เลือก run บน branch `staging` → Re-run failed jobs หรือ push commit ใหม่เข้า `staging`
+
+ตัวอย่างทำงานต่อจาก branch นี้:
+
+```bash
+git switch staging
+git switch -c codex/my-change
+# แก้โค้ด commit และ push แล้วเปิด PR โดยตั้ง base เป็น staging
+```
+
+รายละเอียดอ้างอิง: [Cloudflare GitHub Actions](https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/) และ [GitHub deployment environments](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments)
+
 ## 2. Remote D1 integration tests
 
 ใช้ฐานเฉพาะที่ไม่มีข้อมูลส่วนตัว ทดสอบผ่าน Worker entry แยกจากแอปจริง และป้องกันด้วย test runner secret
