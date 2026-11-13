@@ -1,9 +1,12 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+
 const marker = "<!-- stacklet-check-results -->";
 const labels = {
-  success: "✅ ผ่าน",
-  failure: "❌ ไม่ผ่าน",
-  cancelled: "⏹️ ยกเลิก",
-  skipped: "⏭️ ไม่ได้รัน",
+  success: "✅ Passed",
+  failure: "❌ Failed",
+  cancelled: "⏹️ Cancelled",
+  skipped: "⏭️ Skipped",
 };
 const checks = [
   ["check", "TypeScript / lint / format"],
@@ -13,28 +16,118 @@ const checks = [
   ["build", "Build"],
 ];
 
-export function buildCheckSummary({ context, steps, status }) {
+const testIds = ["unit", "integration", "e2e"];
+const validCount = (value) => Number.isSafeInteger(value) && value >= 0;
+
+async function readJson(path) {
+  try {
+    return JSON.parse(await readFile(path, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+export async function readCheckMetrics(directory = ".ci-results") {
+  const entries = await Promise.all(
+    checks.map(async ([id]) => {
+      const timing = await readJson(join(directory, `${id}-timing.json`));
+      const metric = {};
+
+      if (Number.isFinite(timing?.durationMs) && timing.durationMs >= 0)
+        metric.durationMs = timing.durationMs;
+
+      if (testIds.includes(id)) {
+        const report = await readJson(join(directory, `${id}.json`));
+        const counts =
+          id === "e2e"
+            ? {
+                passed: report?.stats?.expected,
+                failed: report?.stats?.unexpected,
+                skipped: report?.stats?.skipped,
+                flaky: report?.stats?.flaky,
+              }
+            : {
+                passed: report?.numPassedTests,
+                failed: report?.numFailedTests,
+                skipped:
+                  (report?.numPendingTests ?? NaN) +
+                  (report?.numTodoTests ?? 0),
+                flaky: 0,
+              };
+
+        if (Object.values(counts).every(validCount)) {
+          Object.assign(metric, counts);
+          // Playwright's flaky category passed after a retry; count each test once.
+          metric.passed += metric.flaky;
+        }
+      }
+
+      return [id, metric];
+    }),
+  );
+
+  return Object.fromEntries(entries);
+}
+
+export function formatDuration(durationMs) {
+  if (!Number.isFinite(durationMs) || durationMs < 0) return "—";
+
+  const tenths = Math.round(durationMs / 100);
+  const minutes = Math.floor(tenths / 600);
+  const seconds = ((tenths % 600) / 10).toFixed(1);
+
+  return minutes ? `${minutes}m ${seconds}s` : `${seconds}s`;
+}
+
+export function buildCheckSummary({ context, steps, status, metrics = {} }) {
   const repository = `${context.repo.owner}/${context.repo.repo}`;
   const server = context.serverUrl ?? "https://github.com";
   const sha = context.payload.pull_request?.head.sha ?? context.sha;
   const runUrl = `${server}/${repository}/actions/runs/${context.runId}/attempts/${context.runAttempt}`;
-  const rows = checks.map(
-    ([id, name]) =>
-      `| ${name} | ${labels[steps[id]?.outcome] ?? labels.skipped} |`,
-  );
+  const rows = checks.map(([id, name]) => {
+    const metric = metrics[id] ?? {};
+    const count = (key) => metric[key] ?? "—";
+
+    return `| ${name} | ${labels[steps[id]?.outcome] ?? labels.skipped} | ${count("passed")} | ${count("failed")} | ${count("skipped")} | ${formatDuration(metric.durationMs)} |`;
+  });
+  const reported = testIds
+    .map((id) => metrics[id])
+    .filter((metric) => validCount(metric?.passed));
+
+  if (reported.length) {
+    const sum = (key) =>
+      reported.reduce((total, metric) => total + metric[key], 0);
+    const duration = reported.every((metric) =>
+      Number.isFinite(metric.durationMs),
+    )
+      ? sum("durationMs")
+      : undefined;
+
+    rows.push(
+      `| **Reported test totals** | — | **${sum("passed")}** | **${sum("failed")}** | **${sum("skipped")}** | **${formatDuration(duration)}** |`,
+    );
+  }
+  const flaky = metrics.e2e?.flaky ?? 0;
 
   return [
     marker,
     `<!-- stacklet-check-run:${context.runId}:${context.runAttempt} -->`,
-    `### ผลตรวจสอบ: ${labels[status] ?? status}`,
+    `### Verification results: ${labels[status] ?? status}`,
     "",
-    `Commit: [\`${sha.slice(0, 7)}\`](${server}/${repository}/commit/${sha}) · [ดู logs และ artifacts](${runUrl})`,
+    `Commit: [\`${sha.slice(0, 7)}\`](${server}/${repository}/commit/${sha}) · [View logs and artifacts](${runUrl})`,
     "",
-    "| รายการ | ผล |",
-    "| --- | --- |",
+    "| Check | Status | Passed | Failed | Skipped | Duration |",
+    "| --- | --- | ---: | ---: | ---: | ---: |",
     ...rows,
     "",
-    "_อัปเดตคอมเมนต์นี้เมื่อ CI รันใหม่ ขั้นตอนที่ถูกข้ามจะแสดงว่าไม่ได้รัน_",
+    ...(flaky
+      ? [
+          ``,
+          `Flaky E2E tests: **${flaky}** (passed after retry; included in Passed).`,
+        ]
+      : []),
+    "_Durations are command wall-clock times. Totals include reported test suites only; check/build counts and unavailable data are shown as —._",
+    "_This comment is updated on each CI run._",
   ].join("\n");
 }
 
@@ -44,8 +137,9 @@ export async function reportCheckResults({
   core,
   steps,
   status,
+  metrics = {},
 }) {
-  const body = buildCheckSummary({ context, steps, status });
+  const body = buildCheckSummary({ context, steps, status, metrics });
 
   await core.summary.addRaw(body).write();
 

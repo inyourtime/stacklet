@@ -23,22 +23,31 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm cf:typegen
-      - run: pnpm check
+      - run: node scripts/run-ci-check.mjs check pnpm check
         id: check
-      - run: pnpm test
+      - run: node scripts/run-ci-check.mjs unit pnpm test --reporter=default --reporter=json --outputFile.json=.ci-results/unit.json
         id: unit
-      - run: pnpm test:integration
+      - run: node scripts/run-ci-check.mjs integration pnpm test:integration --reporter=default --reporter=json --outputFile.json=.ci-results/integration.json
         id: integration
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm test:e2e
+      - run: node scripts/run-ci-check.mjs e2e pnpm test:e2e --reporter=list,json
         id: e2e
-      - run: pnpm build
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: .ci-results/e2e.json
+      - run: node scripts/run-ci-check.mjs build pnpm build
         id: build
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: browser-test-results
           path: test-results/
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: check-reports
+          path: .ci-results/
+          include-hidden-files: true
+          if-no-files-found: ignore
       - name: Report check results
         if: always()
         continue-on-error: true
@@ -48,9 +57,10 @@ jobs:
           CHECK_STATUS: ${{ job.status }}
         with:
           script: |
-            const { reportCheckResults } = await import(`${process.env.GITHUB_WORKSPACE}/scripts/report-check-results.mjs`);
+            const { readCheckMetrics, reportCheckResults } = await import(`${process.env.GITHUB_WORKSPACE}/scripts/report-check-results.mjs`);
             await reportCheckResults({
               github, context, core,
               steps: JSON.parse(process.env.CHECK_STEPS),
               status: process.env.CHECK_STATUS,
+              metrics: await readCheckMetrics(),
             });

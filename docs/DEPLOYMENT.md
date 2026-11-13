@@ -31,7 +31,7 @@ Vite plugin เลือก environment ด้วย `CLOUDFLARE_ENV` และ�
 
 Workflow `.github/workflows/check.yml` รัน checks, domain/integration tests, browser tests และ build บน PR ทุก branch และ push เข้า `main` โดยไม่รันซ้ำจาก push เข้า feature branch และไม่มี job deploy ที่ถูก skip ใน PR
 
-หลังตรวจเสร็จจะสรุปผลแต่ละขั้นตอนใน Actions job summary และคอมเมนต์ใน PR พร้อม commit และลิงก์ logs/artifacts โดยอัปเดตคอมเมนต์เดิมในแต่ละรอบ รวมกรณี tests ล้มเหลวหรือขั้นตอนถูกข้าม ไม่ให้ผลของ commit เก่าทับ commit ใหม่ การโพสต์คอมเมนต์ล้มเหลวไม่เปลี่ยนผล verification สำหรับ PR จาก fork จะมีเฉพาะ job summary เพราะ token ไม่มีสิทธิ์เขียนคอมเมนต์
+After verification, Actions publishes an English job summary and updates a single PR comment with each check's status, passed/failed/skipped test counts, command wall-clock duration, commit, and logs/artifacts link. Vitest and Playwright produce JSON reports; `.ci-results/` also contains timings and is uploaded as the `check-reports` artifact, independently of browser traces. Test totals include available reports only; missing reports and non-test counts display `—`. E2E tests that pass after retry count as passed and are explicitly flagged as flaky. Reports are still published after test failures, and stale runs cannot overwrite a newer commit's result. Comment-posting failures do not change verification results. Fork PRs receive the job summary only because their token cannot write comments.
 
 Workflow `.github/workflows/deploy-staging.yml` ทำงานเฉพาะ push เข้า `staging` รวมถึงการ merge PR โดยเรียก `check.yml` ผ่าน reusable workflow ก่อน เมื่อ job `verify` ผ่านจึงรัน `deploy-staging` ต่อ จึงใช้ชุดตรวจเดียวกันทั้ง PR และ staging
 
